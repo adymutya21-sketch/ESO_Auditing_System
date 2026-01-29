@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Student Outstanding Fees</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 50px;
+        }
+
+        a.button {
+            display: inline-block;
+            padding: 15px 25px;
+            font-size: 18px;
+            text-decoration: none;
+            color: white;
+            background-color: #4CAF50;
+            border-radius: 5px;
+            margin: 10px;
+        }
+
+        a.button:hover {
+            background-color: #45a049;
+        }
+
+        .grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        grid-template-rows: repeat(5, auto);
+        gap: 10px;
+        }
+
+        .grid div {
+        padding: 8px;
+        border: 1px solid #ccc;
+        }
+
+        .grid_v2 {
+        display: grid;
+        grid-template-columns: repeat(1, 1fr);
+        grid-template-rows: repeat(5, auto);
+        gap: 10px;
+        }
+
+        .grid_v3 {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        grid-template-rows: repeat(5, auto);
+        gap: 10px;
+        }
+
+        .feeGrid {
+            padding: 10px;
+            border: 1px solid #ddd;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+<h1>Student Outstanding Fees</h1>
+
+<a class="button" href="index.html">Back</a> <!-- Go BAck-->
+
+<div class="grid_v2">
+    <div>Name of Tresureer</div><div>Gcash Number:09123456789</div>
+</div>
+
+<div class="grid" id="feeGrid"></div>
+
+<div class="grid_v3">
+    <div>Eso</div><div>Verifed</div>
+    <div>Dean</div><div>Verifed
+
+<script src="js/student_fees.js"></script>
+
+</body>
+</html>

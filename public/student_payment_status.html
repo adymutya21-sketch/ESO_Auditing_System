@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>CSV Grid Display</title>
+    <!-- Link external CSS -->
+    <link rel="stylesheet" href="css/student_payment.css">
+</head>
+<body>
+
+<h2>Student Payment Status</h2>
+
+<a class="button" href="index.html">Back</a> <!-- Go BAck-->
+
+<!-- Search by Name or ID -->
+<input type="text" id="searchInput" placeholder="Search by Name or ID..." style="margin: 10px 0; padding: 8px; width: 250px; font-size: 16px;">
+
+<!-- Dropdown to filter status -->
+<select id="statusFilter" style="margin: 10px 10px 20px 0; padding: 8px; font-size: 16px;">
+    <option value="">All Statuses</option>
+    <option value="PAID">PAID</option>
+    <option value="UNPAID">UNPAID</option>
+    <option value="DONE">DONE</option>
+    <option value="PENDING">PENDING</option>
+</select>
+
+<!-- Dropdown to filter courses -->
+<select id="coursesFilter" style="margin: 10px 10px 20px 0; padding: 8px; font-size: 16px;">
+    <option value="">All Courses</option>
+    <option value="BSCPE">BSCpE</option>
+    <option value="BSCE">BSCE</option>
+    <option value="BSEE">BSEE</option>
+    <option value="BSME">BSME</option>
+    <option value="BSECE">BSECE</option>
+</select>
+
+<div id="grid" class="grid-container"></div>
+
+<!-- Link external JS -->
+<script src="js/student_payment.js"></script>
+</body>
+</html>
