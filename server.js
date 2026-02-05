@@ -78,7 +78,29 @@ app.delete("/fees/:id", async (req, res) => {
     }
 });
 
+//Get Student list
+app.get("/students_list", async (req, res) => {
+    try {
+        const [rows] = await db.execute("SELECT * FROM students_lists");
+        res.json(rows);
+    } catch (err) {
+        res.status(500).json({ error: "Failed to fetch students_list" });
+    }
+});
 
+app.post("/students_list", async (req, res) => {
+    const { first_name, last_name, student_id, course, year_level, gmail,password } = req.body;
+
+    try {
+        await db.execute(
+            "INSERT INTO students_lists (first_name, last_name, student_id, course, year_level, gmail, password) VALUES (?, ?, ?, ?, ?, ?, ?)",
+            [first_name, last_name, student_id, course, year_level, gmail,password]
+        );
+        res.json({ success: true });
+    } catch (err) {
+        res.status(500).json({ error: "Failed to add students_list" });
+    }
+});
 
 // Start server
 app.listen(3000, () => {

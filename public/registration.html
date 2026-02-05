@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 50px;
+        }
+
+        a.button {
+            display: inline-block;
+            padding: 15px 25px;
+            font-size: 18px;
+            text-decoration: none;
+            color: white;
+            background-color: #4CAF50;
+            border-radius: 5px;
+            margin: 10px;
+        }
+
+        a.button:hover {
+            background-color: #45a049;
+        }
+
+        .grid {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        grid-template-rows: repeat(5, auto);
+        gap: 10px;
+        }
+
+        .grid div {
+        padding: 8px;
+        border: 1px solid #ccc;
+        }
+    </style>
+</head>
+<body>
+    
+    <h2>Student Registration</h2>
+
+    <!-- First Name -->
+    <input type="text" id="firstNameInput" placeholder="Input First Name" style="margin: 10px 0; padding: 8px; width: 250px; font-size: 16px;">
+    
+    <!-- Last Name -->
+    <input type="text" id="lastNameInput" placeholder="Input Last Name" style="margin: 10px 0; padding: 8px; width: 250px; font-size: 16px;">
+
+    <!-- Student ID -->
+    <input type="text" id="studentIdInput" placeholder="Input Student ID" style="margin: 10px 0; padding: 8px; width: 250px; font-size: 16px;">
+    
+    <!-- Course -->
+    <input type="text" id="courseInput" placeholder="Input Course" style="margin: 10px 0; padding: 8px; width: 250px; font-size: 16px;">
+
+    <!-- Year Level -->
+    <input type="text" id="yearLevelInput" placeholder="Input Year Level" style="margin: 10px 0; padding: 8px; width: 250px; font-size: 16px;">
+    
+    <!-- Email -->
+    <input type="text" id="emailInput" placeholder="Input Email" style="margin: 10px 0; padding: 8px; width: 250px; font-size: 16px;">
+
+    <!-- Password -->
+    <input type="password" id="passwordInput" placeholder="Input Password" style="margin: 10px 0; padding: 8px; width: 250px; font-size: 16px;">
+
+    <!-- Register Button -->
+    <button onclick="registerStudent()">Register</button>
+
+    <a class="button" href="index.html">Back</a> <!-- Go BAck-->
+
+    <div class="grid" id="studentGrid"></div>
+
+    <script src="js/student_list.js"></script>
+
+</body>
+</html>

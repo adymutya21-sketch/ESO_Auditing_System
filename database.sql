@@ -56,3 +56,14 @@ DESCRIBE course;
 DESCRIBE students;
 DESCRIBE fee_list;
 DESCRIBE student_payment;
+
+
+CREATE TABLE students_lists (
+  id VARCHAR(20) PRIMARY KEY,
+  first_name VARCHAR(100),
+  last_name VARCHAR(100),
+  course VARCHAR(50),
+  year_level INT,
+  gmail VARCHAR(100) UNIQUE,
+  password VARCHAR(255)
+);
