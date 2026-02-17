@@ -1,13 +1,14 @@
 import { createBrowserRouter } from "react-router-dom";
 
 /* Layouts */
-import MainLayout from "../layouts/MainLayout.tsx";
-import AdminLayout from "../layouts/AdminLayout";
-import StudentLayout from "../layouts/StudentLayout";
+import MainLayout from "../src/layouts/MainLayout.tsx";
+import AdminLayout from "../src/layouts/AdminLayout.tsx";
+import StudentLayout from "../src/layouts/StudentLayout.tsx";
 
 /* Pages */
-import LandingPage from "../src/pages/LandingPage";
+import LandingPage from "../src/pages/LandingPage.tsx";
 import NotFoundPage from "../src/pages/NotFoundPage";
+import Signup from "../src/pages/SignupPage.tsx";
 
 /* Admin Pages */
 import AdminDashboard from "../src/pages/admin/AdminDashboard";
@@ -32,9 +33,10 @@ const router = createBrowserRouter([
                 index: true,
                 element: <LandingPage />,
             },
+            { index: true, element: <Signup /> }
+
         ],
     },
-
     /* ADMIN ROUTES */
     {
         path: "/admin",
