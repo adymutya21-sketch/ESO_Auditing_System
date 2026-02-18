@@ -1,16 +1,16 @@
-import { useState, useReducer, useEffect } from "react";
+// REVIEWME  
+import { useState, useReducer } from "react";
 import "../../styles/index.css";
 import Signup from "./SignupPage";
 import { useNavigate } from "react-router-dom";
 
-// TODO: Login and Signup logic
 // Assets
 import logo from "../assets/ESO_Logo.png";
 import MarSU_BG from "../assets/MarSU_BG.png";
 
-// ----------------------------
+
 // Types
-// ----------------------------
+
 interface SigninState {
     email: string;
     password: string;
@@ -41,9 +41,9 @@ export type FormAction =
     | { type: "RESET_SIGNIN" }
     | { type: "RESET_SIGNUP" };
 
-// ----------------------------
+
 // Initial State
-// ----------------------------
+
 const initialState: FormState = {
     signin: { email: "", password: "" },
     signup: {
@@ -61,9 +61,9 @@ const initialState: FormState = {
     },
 };
 
-// ----------------------------
+
 // Reducer
-// ----------------------------
+
 function formReducer(state: FormState, action: FormAction): FormState {
     switch (action.type) {
         case "SIGNIN_CHANGE":
@@ -89,9 +89,9 @@ function formReducer(state: FormState, action: FormAction): FormState {
     }
 }
 
-// ----------------------------
+
 // LandingPage Component
-// ----------------------------
+
 const LandingPage = () => {
     const [showSignup, setShowSignup] = useState(false);
     const [state, dispatch] = useReducer(formReducer, initialState);
@@ -99,9 +99,9 @@ const LandingPage = () => {
 
     const navigate = useNavigate();
 
-    // ----------------------------
+
     // Show Signup Toggle
-    // ----------------------------
+
     const handleShowSignup = () => {
         setSigninError("");
         setShowSignup(true);
@@ -111,9 +111,7 @@ const LandingPage = () => {
         setShowSignup(false);
     };
 
-    // ----------------------------
-    // LOGIN Logic + Redirect
-    // ----------------------------
+    // LOGIN Logic
     const handleSigninSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         setSigninError("");
@@ -125,67 +123,100 @@ const LandingPage = () => {
             return;
         }
 
-        // Load users from localStorage
-        const usersRaw = localStorage.getItem("users");
-        const users: any[] = usersRaw ? JSON.parse(usersRaw) : [];
+        // Load MAIN user object
+        const userRaw = localStorage.getItem("user");
 
-        // Find user
-        const foundUser = users.find(
-            (user) =>
-                user.email === email.trim() && user.password === password.trim()
-        );
-
-        if (!foundUser) {
-            setSigninError(
-                "Invalid email or password. Please try again or sign up first."
-            );
+        if (!userRaw) {
+            setSigninError("No user data found in localStorage.");
             return;
         }
 
-        // Save current user
+        const userData = JSON.parse(userRaw);
+
+        // Collect all accounts
+        const accounts: any[] = [];
+
+        // --- Admin Profile
+        if (userData.admin?.profile) {
+            accounts.push(userData.admin.profile);
+        }
+
+        // --- Student Profiles
+        if (userData.students) {
+            Object.values(userData.students).forEach((student: any) => {
+                if (student.profile) {
+                    accounts.push(student.profile);
+                }
+            });
+        }
+
+        // Find user match
+        const foundUser = accounts.find(
+            (acc) =>
+                acc.email === email.trim() &&
+                acc.password === password.trim()
+        );
+
+        if (!foundUser) {
+            setSigninError("Invalid email or password.");
+            return;
+        }
+
+        // ✅ Save logged-in user session
         localStorage.setItem("currentUser", JSON.stringify(foundUser));
-
-
 
         dispatch({ type: "RESET_SIGNIN" });
 
-        // ----------------------------
-        // Redirect Logic
-        // ----------------------------
-        if (foundUser.email === "admin@gmail.com") {
-            navigate("/admin");
+        // ✅ Redirect by role
+        if (foundUser.role === "admin") {
+            navigate("/admin/dashboard");
         } else {
-            navigate("/student");
+            navigate("/student/dashboard");
         }
     };
 
-    // ----------------------------
-    // Auto Setup Admin Account
-    // ----------------------------
-    useEffect(() => {
-        const usersRaw = localStorage.getItem("users");
-        let users: any[] = usersRaw ? JSON.parse(usersRaw) : [];
+    // 
+    // // Auto Setup Default Admin
+    // 
+    // useEffect(() => {
+    //     const userRaw = localStorage.getItem("user");
 
-        // Check if admin exists already
-        const adminExists = users.find(
-            (user) =>
-                user.email === "admin@gmail.com" && user.password === "admin"
-        );
+    //     // ✅ If no user object exists, create one
+    //     if (!userRaw) {
+    //         localStorage.setItem(
+    //             "user",
+    //             JSON.stringify({
+    //                 admin: {
+    //                     profile: {
+    //                         name: "Default Admin",
+    //                         email: "admin@gmail.com",
+    //                         password: "admin",
+    //                         role: "admin",
+    //                     },
+    //                     dashboard: {
+    //                         verifiedStudents: 120,
+    //                         totalPaid: 95,
+    //                         paidObligations: 75,
+    //                         departments: {
+    //                             "Computer Engineering": 30,
+    //                             "Electrical Engineering": 25,
+    //                             "Electronics Engineering": 20,
+    //                             "Mechanical Engineering": 15,
+    //                             "Civil Engineering": 10,
+    //                         },
+    //                     },
+    //                     obligations: [],
+    //                     studentsList: [],
+    //                 },
 
-        // If not, add admin
-        if (!adminExists) {
-            users.push({
-                email: "admin@gmail.com",
-                password: "admin",
-                role: "admin",
-            });
+    //                 students: {},
+    //             })
+    //         );
+    //     }
 
-            localStorage.setItem("users", JSON.stringify(users));
-        }
-
-        // Remove previous session
-        localStorage.removeItem("currentUser");
-    }, []);
+    //     // Remove previous session
+    //     localStorage.removeItem("currentUser");
+    // }, []);
 
     return (
         <div className="landing-page relative h-screen w-screen bg-black overflow-auto">

@@ -1,21 +1,29 @@
-import { Navigate } from "react-router-dom";
+import { Navigate, useRouteLoaderData } from "react-router-dom";
 
+// BUG admin sign in cannot log in
 type Props = {
     role: "admin" | "student";
     children: React.ReactNode;
 };
 
 export default function ProtectedRoute({ role, children }: Props) {
-    // Temporary fake login role
-    const userRole = localStorage.getItem("role");
+    const adminDataString = localStorage.getItem("admin");
 
-    if (!userRole) {
+    if (!adminDataString) {
+        // No admin data in localStorage
         return <Navigate to="/" replace />;
     }
-
-    if (userRole !== role) {
+    let userRole: string | undefined;
+    try {
+        const adminData = JSON.parse(adminDataString);
+        userRole = adminData?.profile?.role;
+    } catch (error) {
+        // Invalid JSON in localStorage
         return <Navigate to="/" replace />;
     }
-
-    return children;
+    if (!userRole || userRole !== role) {
+        // Role mismatch or undefined
+        return <Navigate to="/" replace />;
+    }
+    return <>{children}</>;
 }

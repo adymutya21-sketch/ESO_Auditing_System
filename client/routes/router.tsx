@@ -1,4 +1,5 @@
 import { createBrowserRouter } from "react-router-dom";
+import { Navigate } from "react-router-dom";
 
 /* Layouts */
 import MainLayout from "../src/layouts/MainLayout.tsx";
@@ -9,6 +10,7 @@ import StudentLayout from "../src/layouts/StudentLayout.tsx";
 import LandingPage from "../src/pages/LandingPage.tsx";
 import NotFoundPage from "../src/pages/NotFoundPage";
 import Signup from "../src/pages/SignupPage.tsx";
+import Signout from "../src/pages/Signout.tsx";
 
 /* Admin Pages */
 import AdminDashboard from "../src/pages/admin/AdminDashboard";
@@ -23,6 +25,7 @@ import Obligations from "../src/pages/admin/Obligations";
 /* Protected Route */
 import ProtectedRoute from "./ProtectedRoute";
 
+
 const router = createBrowserRouter([
     {
         path: "/",
@@ -33,7 +36,6 @@ const router = createBrowserRouter([
                 index: true,
                 element: <LandingPage />,
             },
-            { index: true, element: <Signup /> }
 
         ],
     },
@@ -46,20 +48,14 @@ const router = createBrowserRouter([
             </ProtectedRoute>
         ),
         children: [
-            {
-                index: true,
-                element: <AdminDashboard />,
-            },
-            {
-                path: "settings",
-                element: <AdminSettings />,
-            },
-            {
-                path: "students",
-                element: <StudentList />,
-            },
+            { index: true, element: <Navigate to="dashboard" replace /> }, // default redirect
+            { path: "dashboard", element: <AdminDashboard /> },
+            { path: "settings", element: <AdminSettings /> },
+            { path: "students", element: <StudentList /> },
+            { path: "obligations", element: <Obligations /> },
         ],
     },
+
 
     /* STUDENT ROUTES */
     {
@@ -82,6 +78,11 @@ const router = createBrowserRouter([
                 path: "obligations",
                 element: <Obligations />,
             },
+            // {
+            //     path: "signout",
+            //     element: <Signout />
+
+            // }
         ],
     },
 
