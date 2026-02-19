@@ -1,5 +1,5 @@
 // REVIEWME  
-import { useState, useReducer } from "react";
+import { useState, useReducer, useEffect } from "react";
 import "../../styles/index.css";
 import Signup from "./SignupPage";
 import { useNavigate } from "react-router-dom";
@@ -8,9 +8,7 @@ import { useNavigate } from "react-router-dom";
 import logo from "../assets/ESO_Logo.png";
 import MarSU_BG from "../assets/MarSU_BG.png";
 
-
 // Types
-
 interface SigninState {
     email: string;
     password: string;
@@ -41,9 +39,7 @@ export type FormAction =
     | { type: "RESET_SIGNIN" }
     | { type: "RESET_SIGNUP" };
 
-
 // Initial State
-
 const initialState: FormState = {
     signin: { email: "", password: "" },
     signup: {
@@ -61,9 +57,7 @@ const initialState: FormState = {
     },
 };
 
-
 // Reducer
-
 function formReducer(state: FormState, action: FormAction): FormState {
     switch (action.type) {
         case "SIGNIN_CHANGE":
@@ -71,37 +65,30 @@ function formReducer(state: FormState, action: FormAction): FormState {
                 ...state,
                 signin: { ...state.signin, [action.field]: action.value },
             };
-
         case "SIGNUP_CHANGE":
             return {
                 ...state,
                 signup: { ...state.signup, [action.field]: action.value },
             };
-
         case "RESET_SIGNIN":
             return { ...state, signin: initialState.signin };
-
         case "RESET_SIGNUP":
             return { ...state, signup: initialState.signup };
-
         default:
             return state;
     }
 }
 
-
 // LandingPage Component
-
 const LandingPage = () => {
     const [showSignup, setShowSignup] = useState(false);
     const [state, dispatch] = useReducer(formReducer, initialState);
     const [signinError, setSigninError] = useState("");
+    const [loading, setLoading] = useState(true); // <-- Loading state
 
     const navigate = useNavigate();
 
-
     // Show Signup Toggle
-
     const handleShowSignup = () => {
         setSigninError("");
         setShowSignup(true);
@@ -123,7 +110,6 @@ const LandingPage = () => {
             return;
         }
 
-        // Load MAIN user object
         const userRaw = localStorage.getItem("user");
 
         if (!userRaw) {
@@ -133,24 +119,18 @@ const LandingPage = () => {
 
         const userData = JSON.parse(userRaw);
 
-        // Collect all accounts
         const accounts: any[] = [];
 
-        // --- Admin Profile
         if (userData.admin?.profile) {
             accounts.push(userData.admin.profile);
         }
 
-        // --- Student Profiles
         if (userData.students) {
             Object.values(userData.students).forEach((student: any) => {
-                if (student.profile) {
-                    accounts.push(student.profile);
-                }
+                if (student.profile) accounts.push(student.profile);
             });
         }
 
-        // Find user match
         const foundUser = accounts.find(
             (acc) =>
                 acc.email === email.trim() &&
@@ -162,12 +142,9 @@ const LandingPage = () => {
             return;
         }
 
-        // ✅ Save logged-in user session
         localStorage.setItem("currentUser", JSON.stringify(foundUser));
-
         dispatch({ type: "RESET_SIGNIN" });
 
-        // ✅ Redirect by role
         if (foundUser.role === "admin") {
             navigate("/admin/dashboard");
         } else {
@@ -175,48 +152,13 @@ const LandingPage = () => {
         }
     };
 
-    // 
-    // // Auto Setup Default Admin
-    // 
-    // useEffect(() => {
-    //     const userRaw = localStorage.getItem("user");
-
-    //     // ✅ If no user object exists, create one
-    //     if (!userRaw) {
-    //         localStorage.setItem(
-    //             "user",
-    //             JSON.stringify({
-    //                 admin: {
-    //                     profile: {
-    //                         name: "Default Admin",
-    //                         email: "admin@gmail.com",
-    //                         password: "admin",
-    //                         role: "admin",
-    //                     },
-    //                     dashboard: {
-    //                         verifiedStudents: 120,
-    //                         totalPaid: 95,
-    //                         paidObligations: 75,
-    //                         departments: {
-    //                             "Computer Engineering": 30,
-    //                             "Electrical Engineering": 25,
-    //                             "Electronics Engineering": 20,
-    //                             "Mechanical Engineering": 15,
-    //                             "Civil Engineering": 10,
-    //                         },
-    //                     },
-    //                     obligations: [],
-    //                     studentsList: [],
-    //                 },
-
-    //                 students: {},
-    //             })
-    //         );
-    //     }
-
-    //     // Remove previous session
-    //     localStorage.removeItem("currentUser");
-    // }, []);
+    // Simulate loading delay (or load from localStorage)
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setLoading(false);
+        }, 500); // 0.5s delay for effect
+        return () => clearTimeout(timer);
+    }, []);
 
     return (
         <div className="landing-page relative h-screen w-screen bg-black overflow-auto">
@@ -310,7 +252,6 @@ const LandingPage = () => {
                                     Login
                                 </button>
 
-                                {/* Error */}
                                 {signinError && (
                                     <p className="text-red-400 text-sm mt-2">{signinError}</p>
                                 )}
@@ -330,6 +271,13 @@ const LandingPage = () => {
                     )}
                 </div>
             </main>
+
+            {/* ================= Loading Overlay ================= */}
+            {loading && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-80">
+                    <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-orange-500"></div>
+                </div>
+            )}
         </div>
     );
 };

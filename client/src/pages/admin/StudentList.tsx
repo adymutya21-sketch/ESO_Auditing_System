@@ -2,15 +2,20 @@ import React, { useEffect, useState } from "react";
 import { FaSortAmountDown } from "react-icons/fa";
 import "../../../styles/index.css";
 
-// REVIEWME
-// TODO Fix the UI
 
+// REVIEWME
+// TODO Search Student must be long in desktop and phone
+// TODO verified button must be unverifiable
+// TODO Tablet mode is not respnosive
+
+/* ================= TYPES ================= */
 type Student = {
     id: number;
     name: string;
     studentNumber: string;
     course: string;
     section: string;
+    yearLevel: string;
 
     evaluationsDone: number;
     evaluationsTotal: number;
@@ -19,14 +24,20 @@ type Student = {
     obligationsTotal: number;
 
     paymentStatus: "Paid" | "Unpaid";
-
     verified: boolean;
 };
 
+const courses = [
+    "Computer Engineering",
+    "Electrical Engineering",
+    "Electronics Engineering",
+    "Mechanical Engineering",
+    "Civil Engineering",
+];
+
+/* ================= COMPONENT ================= */
 const StudentList = () => {
-    // -----------------------------
-    // Default Dummy Students
-    // -----------------------------
+    /* ================= DEFAULT STUDENTS ================= */
     const defaultStudents: Student[] = [
         {
             id: 1,
@@ -34,6 +45,7 @@ const StudentList = () => {
             studentNumber: "2023-0001",
             course: "Computer Engineering",
             section: "A",
+            yearLevel: "3rd Year",
             evaluationsDone: 2,
             evaluationsTotal: 3,
             obligationsDone: 3,
@@ -47,6 +59,7 @@ const StudentList = () => {
             studentNumber: "2023-0002",
             course: "Electrical Engineering",
             section: "B",
+            yearLevel: "3rd Year",
             evaluationsDone: 3,
             evaluationsTotal: 3,
             obligationsDone: 3,
@@ -60,6 +73,7 @@ const StudentList = () => {
             studentNumber: "2023-0003",
             course: "Mechanical Engineering",
             section: "C",
+            yearLevel: "4th Year",
             evaluationsDone: 1,
             evaluationsTotal: 3,
             obligationsDone: 2,
@@ -69,44 +83,59 @@ const StudentList = () => {
         },
     ];
 
-    // -----------------------------
-    // LocalStorage
-    // -----------------------------
+    /* ================= STATE ================= */
     const [students, setStudents] = useState<Student[]>([]);
 
-    useEffect(() => {
-        const stored = localStorage.getItem("students");
+    const [search, setSearch] = useState("");
 
-        if (stored) {
-            setStudents(JSON.parse(stored));
+    // Dropdown Sort States
+    const [courseSort, setCourseSort] = useState("all");
+    const [basicSort, setBasicSort] = useState("none");
+    const [statusSort, setStatusSort] = useState("none");
+
+    /* ================= LOAD FROM USER OBJECT ================= */
+    useEffect(() => {
+        const storedUser = localStorage.getItem("user");
+
+        if (!storedUser) {
+            // Create user object fully
+            const newUser = {
+                admin: {
+                    students: defaultStudents,
+                },
+            };
+
+            localStorage.setItem("user", JSON.stringify(newUser));
+            setStudents(defaultStudents);
+            return;
+        }
+
+        const userData = JSON.parse(storedUser);
+
+        if (userData.admin?.students) {
+            setStudents(userData.admin.students);
         } else {
-            localStorage.setItem("students", JSON.stringify(defaultStudents));
+            userData.admin.students = defaultStudents;
+            localStorage.setItem("user", JSON.stringify(userData));
             setStudents(defaultStudents);
         }
     }, []);
 
+    /* ================= SAVE BACK TO USER ================= */
     useEffect(() => {
-        if (students.length > 0) {
-            localStorage.setItem("students", JSON.stringify(students));
-        }
+        if (students.length === 0) return;
+
+        const storedUser = localStorage.getItem("user");
+        if (!storedUser) return;
+
+        const userData = JSON.parse(storedUser);
+
+        userData.admin.students = students;
+
+        localStorage.setItem("user", JSON.stringify(userData));
     }, [students]);
 
-    // -----------------------------
-    // UI States
-    // -----------------------------
-    const [search, setSearch] = useState("");
-
-    // Single Sort Dropdown State
-    const [sortOption, setSortOption] = useState("all");
-
-    // Modals
-    const [evaluationModal, setEvaluationModal] = useState<Student | null>(null);
-    const [obligationModal, setObligationModal] = useState<Student | null>(null);
-    const [unverifyModal, setUnverifyModal] = useState<Student | null>(null);
-
-    // -----------------------------
-    // Verify Rules
-    // -----------------------------
+    /* ================= VERIFY RULES ================= */
     function canVerify(student: Student) {
         return (
             student.evaluationsDone === student.evaluationsTotal &&
@@ -128,82 +157,75 @@ const StudentList = () => {
         );
     }
 
-    function handleUnverify(student: Student) {
+    function handleVerifyAll() {
         setStudents((prev) =>
-            prev.map((s) =>
-                s.id === student.id ? { ...s, verified: false } : s
-            )
+            prev.map((s) => (canVerify(s) ? { ...s, verified: true } : s))
         );
-        setUnverifyModal(null);
     }
 
-    // -----------------------------
-    // Filtering + Sorting
-    // -----------------------------
+    /* ================= FILTERING ================= */
     let filteredStudents = students.filter((s) =>
         s.name.toLowerCase().includes(search.toLowerCase())
     );
 
-    // Sort Dropdown Filters
-    if (sortOption === "evalComplete") {
+    /* ===== COURSE FILTER ===== */
+    if (courseSort !== "all") {
         filteredStudents = filteredStudents.filter(
-            (s) => s.evaluationsDone === s.evaluationsTotal
+            (s) => s.course === courseSort
         );
     }
 
-    if (sortOption === "obligationComplete") {
-        filteredStudents = filteredStudents.filter(
-            (s) => s.obligationsDone === s.obligationsTotal
-        );
-    }
+    /* ===== BASIC SORT ===== */
+    if (basicSort === "az")
+        filteredStudents.sort((a, b) => a.name.localeCompare(b.name));
 
-    if (sortOption === "paid") {
+    if (basicSort === "za")
+        filteredStudents.sort((a, b) => b.name.localeCompare(a.name));
+
+    if (basicSort === "year")
+        filteredStudents.sort((a, b) =>
+            a.yearLevel.localeCompare(b.yearLevel)
+        );
+
+    if (basicSort === "section")
+        filteredStudents.sort((a, b) =>
+            a.section.localeCompare(b.section)
+        );
+
+    /* ===== STATUS SORT ===== */
+    if (statusSort === "verified")
+        filteredStudents = filteredStudents.filter((s) => s.verified);
+
+    if (statusSort === "unverified")
+        filteredStudents = filteredStudents.filter((s) => !s.verified);
+
+    if (statusSort === "paid")
         filteredStudents = filteredStudents.filter(
             (s) => s.paymentStatus === "Paid"
         );
-    }
 
-    if (sortOption === "unpaid") {
+    if (statusSort === "unpaid")
         filteredStudents = filteredStudents.filter(
             (s) => s.paymentStatus === "Unpaid"
         );
-    }
 
-    if (sortOption === "verified") {
-        filteredStudents = filteredStudents.filter((s) => s.verified);
-    }
+    if (statusSort === "evalComplete")
+        filteredStudents = filteredStudents.filter(
+            (s) => s.evaluationsDone === s.evaluationsTotal
+        );
 
-    if (sortOption === "unverified") {
-        filteredStudents = filteredStudents.filter((s) => !s.verified);
-    }
+    if (statusSort === "obligationComplete")
+        filteredStudents = filteredStudents.filter(
+            (s) => s.obligationsDone === s.obligationsTotal
+        );
 
-    // Sorting Name
-    if (sortOption === "az") {
-        filteredStudents.sort((a, b) => a.name.localeCompare(b.name));
-    }
-
-    if (sortOption === "za") {
-        filteredStudents.sort((a, b) => b.name.localeCompare(a.name));
-    }
-
-    // Sorting by Course
-    if (sortOption === "course") {
-        filteredStudents.sort((a, b) => a.course.localeCompare(b.course));
-    }
-
-    // Sorting by Section
-    if (sortOption === "section") {
-        filteredStudents.sort((a, b) => a.section.localeCompare(b.section));
-    }
-
-    // -----------------------------
-    // Download CSV
-    // -----------------------------
+    /* ================= CSV DOWNLOAD ================= */
     function downloadCSV() {
         const headers = [
             "Name",
             "Student Number",
             "Course",
+            "Year Level",
             "Section",
             "Evaluations",
             "Obligations",
@@ -211,10 +233,11 @@ const StudentList = () => {
             "Verified",
         ];
 
-        const rows = students.map((s) => [
+        const rows = filteredStudents.map((s) => [
             s.name,
             s.studentNumber,
             s.course,
+            s.yearLevel,
             s.section,
             `${s.evaluationsDone}/${s.evaluationsTotal}`,
             `${s.obligationsDone}/${s.obligationsTotal}`,
@@ -222,8 +245,7 @@ const StudentList = () => {
             s.verified ? "Yes" : "No",
         ]);
 
-        const csvContent =
-            [headers, ...rows].map((r) => r.join(",")).join("\n");
+        const csvContent = [headers, ...rows].map((r) => r.join(",")).join("\n");
 
         const blob = new Blob([csvContent], { type: "text/csv" });
         const url = URL.createObjectURL(blob);
@@ -234,127 +256,145 @@ const StudentList = () => {
         link.click();
     }
 
+    /* ================= UI ================= */
     return (
-        <div className="p-4 sm:p-6 md:p-10">
-            {/* Header */}
+        <div className="p-4 sm:p-6 md:p-10 bg-gray-50 min-h-screen">
+            {/* HEADER */}
             <div className="flex flex-col sm:flex-row justify-between gap-3 mb-6">
                 <h1 className="font-bold text-gray-800 text-2xl sm:text-4xl">
                     Student List
                 </h1>
 
-                <button
-                    onClick={downloadCSV}
-                    className="bg-primary text-white px-4 py-2 rounded-lg text-sm"
-                >
-                    Download Excel
-                </button>
+                <div className="flex gap-2">
+                    <button
+                        onClick={downloadCSV}
+                        className="bg-primary text-white px-4 py-2 rounded-lg text-sm"
+                    >
+                        Download Excel
+                    </button>
+
+                    <button
+                        onClick={handleVerifyAll}
+                        className="bg-green-600 text-white px-4 py-2 rounded-lg text-sm"
+                    >
+                        Verify All
+                    </button>
+                </div>
             </div>
 
-            {/* Search + Sort */}
-            <div className="flex flex-col sm:flex-row gap-3 mb-6">
-                {/* Search */}
+            {/* SEARCH + DROPDOWNS */}
+            <div className="flex flex-col lg:flex-row justify-between gap-4 mb-6">
+                {/* SEARCH */}
                 <input
                     type="text"
                     placeholder="Search student..."
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
-                    className="border rounded-lg px-3 py-2 text-sm w-full sm:w-1/2"
+                    className="border rounded-lg px-3 py-2 text-sm w-full lg:w-1/3"
                 />
 
-                {/* Sort Dropdown */}
-                <div className="flex items-center gap-2 border rounded-lg px-3 py-2 bg-white w-full sm:w-1/2">
-                    <FaSortAmountDown className="text-gray-500" />
-
+                {/* DROPDOWNS */}
+                <div className="flex flex-col sm:flex-row gap-3 w-full lg:w-2/3 justify-end">
+                    {/* COURSE FILTER */}
                     <select
-                        value={sortOption}
-                        onChange={(e) => setSortOption(e.target.value)}
-                        className="w-full outline-none text-sm bg-transparent"
+                        value={courseSort}
+                        onChange={(e) => setCourseSort(e.target.value)}
+                        className="border rounded-lg px-3 py-2 text-sm bg-white"
                     >
-                        <option value="all">Sort By...</option>
+                        <option value="all">All Courses</option>
+                        {courses.map((c) => (
+                            <option key={c} value={c}>
+                                {c}
+                            </option>
+                        ))}
+                    </select>
 
-                        <option value="az">Name A-Z</option>
-                        <option value="za">Name Z-A</option>
-
-                        <option value="course">By Course</option>
+                    {/* BASIC SORT */}
+                    <select
+                        value={basicSort}
+                        onChange={(e) => setBasicSort(e.target.value)}
+                        className="border rounded-lg px-3 py-2 text-sm bg-white"
+                    >
+                        <option value="none">Sort (Basic)</option>
+                        <option value="az">Name A–Z</option>
+                        <option value="za">Name Z–A</option>
+                        <option value="year">By Year Level</option>
                         <option value="section">By Section</option>
+                    </select>
 
-                        <option value="evalComplete">Complete Evaluation (3/3)</option>
-                        <option value="obligationComplete">Complete Obligation (3/3)</option>
-
-                        <option value="paid">Paid Students</option>
-                        <option value="unpaid">Unpaid Students</option>
-
-                        <option value="verified">Verified Students</option>
-                        <option value="unverified">Unverified Students</option>
+                    {/* STATUS SORT */}
+                    <select
+                        value={statusSort}
+                        onChange={(e) => setStatusSort(e.target.value)}
+                        className="border rounded-lg px-3 py-2 text-sm bg-white"
+                    >
+                        <option value="none">Sort (Status)</option>
+                        <option value="verified">Verified</option>
+                        <option value="unverified">Unverified</option>
+                        <option value="paid">Paid</option>
+                        <option value="unpaid">Unpaid</option>
+                        <option value="evalComplete">Eval Complete</option>
+                        <option value="obligationComplete">
+                            Obligations Complete
+                        </option>
                     </select>
                 </div>
             </div>
 
-            {/* Table */}
-            <div className="overflow-x-auto rounded-lg shadow">
+            {/* TABLE */}
+            <div className="overflow-x-auto rounded-xl shadow bg-white">
                 <table className="w-full text-sm">
-                    <thead className="bg-gray-300 text-gray-800">
+                    <thead className="bg-gray-200 text-gray-800">
                         <tr>
                             <th className="p-3 text-left">Name</th>
-                            <th className="p-3">Student No.</th>
-                            <th className="p-3">Course</th>
-                            <th className="p-3">Section</th>
-                            <th className="p-3">Evaluation</th>
-                            <th className="p-3">Obligation</th>
-                            <th className="p-3">Payment</th>
-                            <th className="p-3">Verification</th>
+                            <th className="p-3 text-center">Student No.</th>
+                            <th className="p-3 text-center">Course</th>
+                            <th className="p-3 text-center">Year</th>
+                            <th className="p-3 text-center">Section</th>
+                            <th className="p-3 text-center">Evaluation</th>
+                            <th className="p-3 text-center">Obligation</th>
+                            <th className="p-3 text-center">Payment</th>
+                            <th className="p-3 text-center">Verify</th>
                         </tr>
                     </thead>
 
                     <tbody>
-                        {filteredStudents.map((student) => (
+                        {filteredStudents.map((s) => (
                             <tr
-                                key={student.id}
-                                className="bg-gray-100 border-b hover:bg-gray-200"
+                                key={s.id}
+                                className="border-b hover:bg-gray-50"
                             >
-                                <td className="p-3">{student.name}</td>
-                                <td className="p-3 text-center">{student.studentNumber}</td>
-                                <td className="p-3 text-center">{student.course}</td>
-                                <td className="p-3 text-center">{student.section}</td>
+                                <td className="p-3">{s.name}</td>
+                                <td className="p-3 text-center">{s.studentNumber}</td>
+                                <td className="p-3 text-center">{s.course}</td>
+                                <td className="p-3 text-center">{s.yearLevel}</td>
+                                <td className="p-3 text-center">{s.section}</td>
 
-                                {/* Evaluation Modal */}
-                                <td
-                                    onClick={() => setEvaluationModal(student)}
-                                    className="p-3 text-center text-blue-600 cursor-pointer underline"
-                                >
-                                    {student.evaluationsDone}/{student.evaluationsTotal}
+                                <td className="p-3 text-center">
+                                    {s.evaluationsDone}/{s.evaluationsTotal}
                                 </td>
 
-                                {/* Obligation Modal */}
-                                <td
-                                    onClick={() => setObligationModal(student)}
-                                    className="p-3 text-center text-blue-600 cursor-pointer underline"
-                                >
-                                    {student.obligationsDone}/{student.obligationsTotal}
+                                <td className="p-3 text-center">
+                                    {s.obligationsDone}/{s.obligationsTotal}
                                 </td>
 
-                                {/* Payment */}
                                 <td
-                                    className={`p-3 text-center font-semibold ${student.paymentStatus === "Paid"
+                                    className={`p-3 text-center font-semibold ${s.paymentStatus === "Paid"
                                         ? "text-green-600"
                                         : "text-red-500"
                                         }`}
                                 >
-                                    {student.paymentStatus}
+                                    {s.paymentStatus}
                                 </td>
 
-                                {/* Verification */}
                                 <td className="p-3 text-center">
-                                    {student.verified ? (
-                                        <button
-                                            onClick={() => setUnverifyModal(student)}
-                                            className="bg-green-600 text-white px-3 py-1 rounded-lg"
-                                        >
+                                    {s.verified ? (
+                                        <span className="text-green-600 font-bold">
                                             Verified
-                                        </button>
+                                        </span>
                                     ) : (
                                         <button
-                                            onClick={() => handleVerify(student)}
+                                            onClick={() => handleVerify(s)}
                                             className="bg-primary text-white px-3 py-1 rounded-lg"
                                         >
                                             Verify
@@ -366,90 +406,6 @@ const StudentList = () => {
                     </tbody>
                 </table>
             </div>
-
-            {/* ================= Evaluation Modal ================= */}
-            {evaluationModal && (
-                <div className="fixed inset-0 bg-black/40 flex justify-center items-center">
-                    <div className="bg-white rounded-lg p-6 w-[90%] sm:w-[400px]">
-                        <h2 className="font-bold text-lg mb-3">Evaluation Details</h2>
-
-                        <p>
-                            Student: <b>{evaluationModal.name}</b>
-                        </p>
-                        <p>
-                            Completed:{" "}
-                            <b>
-                                {evaluationModal.evaluationsDone}/
-                                {evaluationModal.evaluationsTotal}
-                            </b>
-                        </p>
-
-                        <button
-                            className="mt-5 bg-primary text-white px-4 py-2 rounded-lg"
-                            onClick={() => setEvaluationModal(null)}
-                        >
-                            Close
-                        </button>
-                    </div>
-                </div>
-            )}
-
-            {/* ================= Obligation Modal ================= */}
-            {obligationModal && (
-                <div className="fixed inset-0 bg-black/40 flex justify-center items-center">
-                    <div className="bg-white rounded-lg p-6 w-[90%] sm:w-[400px]">
-                        <h2 className="font-bold text-lg mb-3">Obligation Details</h2>
-
-                        <p>
-                            Student: <b>{obligationModal.name}</b>
-                        </p>
-                        <p>
-                            Completed:{" "}
-                            <b>
-                                {obligationModal.obligationsDone}/
-                                {obligationModal.obligationsTotal}
-                            </b>
-                        </p>
-
-                        <button
-                            className="mt-5 bg-primary text-white px-4 py-2 rounded-lg"
-                            onClick={() => setObligationModal(null)}
-                        >
-                            Close
-                        </button>
-                    </div>
-                </div>
-            )}
-
-            {/* ================= Unverify Modal ================= */}
-            {unverifyModal && (
-                <div className="fixed inset-0 bg-black/40 flex justify-center items-center">
-                    <div className="bg-white rounded-lg p-6 w-[90%] sm:w-[400px]">
-                        <h2 className="font-bold text-lg mb-4">Unverify Student?</h2>
-
-                        <p>
-                            Are you sure you want to unverify{" "}
-                            <b>{unverifyModal.name}</b>?
-                        </p>
-
-                        <div className="flex justify-end gap-3 mt-6">
-                            <button
-                                className="px-4 py-2 rounded-lg bg-gray-300"
-                                onClick={() => setUnverifyModal(null)}
-                            >
-                                No
-                            </button>
-
-                            <button
-                                className="px-4 py-2 rounded-lg bg-red-600 text-white"
-                                onClick={() => handleUnverify(unverifyModal)}
-                            >
-                                Yes
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
         </div>
     );
 };

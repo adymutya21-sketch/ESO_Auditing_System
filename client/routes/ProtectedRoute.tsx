@@ -1,6 +1,6 @@
 import { Navigate, useRouteLoaderData } from "react-router-dom";
 
-// BUG admin sign in cannot log in
+
 type Props = {
     role: "admin" | "student";
     children: React.ReactNode;

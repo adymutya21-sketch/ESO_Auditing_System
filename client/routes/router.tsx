@@ -25,6 +25,8 @@ import Obligations from "../src/pages/admin/Obligations";
 /* Protected Route */
 import ProtectedRoute from "./ProtectedRoute";
 
+// TODO Add student dashboard route
+
 
 const router = createBrowserRouter([
     {
@@ -70,6 +72,10 @@ const router = createBrowserRouter([
                 index: true,
                 element: <StudentDashboard />,
             },
+            // {
+            //     path: "dashboard",
+            //     element: <StudentDashboard />,
+            // },
             {
                 path: "settings",
                 element: <StudentSettings />,
