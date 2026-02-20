@@ -24,11 +24,11 @@ function loadFees() {
 }
 
 function addFee() {
-    const fee_name = document.getElementById("feeName").value;
-    const amount = document.getElementById("feeAmount").value;
+    const fee_name = document.getElementById("feeName").value; //Get fee name from financial_list.html
+    const amount = document.getElementById("feeAmount").value; //Get fee amount from financial_list.html
 
     if (!fee_name || !amount) {
-        alert("Please fill all fields");
+        alert("Please fill all fields"); //Alert if the Input is empty
         return;
     }
 

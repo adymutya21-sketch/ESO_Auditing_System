@@ -18,7 +18,8 @@ function loadStudentFees() {
 
                 // Proof upload
                 const upload = document.createElement("div");
-                upload.innerHTML = `<input type="file" accept="image/*">`;
+                upload.innerHTML = `<input type="file" accept="image/*">
+                                    <button onclick="uploadProof('${fee.id}')">Upload Proof</button>`;
 
                 // Status (default for students)
                 const status = document.createElement("div");
@@ -34,3 +35,7 @@ function loadStudentFees() {
             console.error("Failed to load fees:", err);
         });
 }
+
+
+function uploadProof(feeId) {
+    fetch("/uploadImg")}

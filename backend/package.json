@@ -68,7 +68,7 @@
     "setprototypeof": "^1.2.0",
     "side-channel": "^1.1.0",
     "side-channel-list": "^1.0.0",
-    "side-channel-map": "^1.0.1",
+    "side-channel-map": "^1.0 .1",
     "side-channel-weakmap": "^1.0.2",
     "ssf": "^0.11.2",
     "statuses": "^2.0.2",
@@ -82,11 +82,15 @@
     "xlsx": "^0.18.5"
   },
   "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node server.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "type": "commonjs"
+  "type": "commonjs",
+  "devDependencies": {}
 }
